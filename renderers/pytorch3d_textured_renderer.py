@@ -208,7 +208,7 @@ class TexturedIUVRenderer(nn.Module):
         if self.render_rgb:
             self.rgb_shader = HardPhongShader(device=device, cameras=self.cameras,
                                               lights=self.lights_rgb_render, blend_params=blend_params)
-
+        self.device=device
         self.to(device)
 
     def to(self, device):
@@ -271,8 +271,14 @@ class TexturedIUVRenderer(nn.Module):
                 textures_rgb = TexturesUV(maps=textures, faces_uvs=self.faces_densepose, verts_uvs=self.verts_uv_offset)
             meshes_rgb = Meshes(verts=vertices, faces=self.faces_densepose, textures=textures_rgb)
 
+        local_cameras = OrthographicCameras(device=self.device,
+                                               R=self.cameras.R,
+                                               T=self.cameras.T,
+                                               focal_length=orthographic_scale,
+                                               principal_point=((0, 0),),
+                                               image_size=((self.img_wh, self.img_wh),))
         # Rasterize
-        fragments = self.rasterizer(meshes_iuv, cameras=self.cameras)
+        fragments = self.rasterizer(meshes_iuv, cameras=local_cameras)
         zbuffers = fragments.zbuf[:, :, :, 0]
 
         # Render RGB and IUV outputs
