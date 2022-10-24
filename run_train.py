@@ -21,7 +21,8 @@ from train.train_poseMF_shapeGaussian_net import train_poseMF_shapeGaussian_net
 def run_train(device,
               experiment_dir,
               pose_shape_cfg_opts=None,
-              resume_from_epoch=None):
+              resume_from_epoch=None,
+              train_image_save):
 
     pose_shape_cfg = get_poseMF_shapeGaussian_cfg_defaults()
 
@@ -115,7 +116,8 @@ def run_train(device,
                                    metrics=['PVE', 'PVE-SC', 'PVE-T-SC', 'MPJPE', 'MPJPE-SC', 'MPJPE-PA', 'joints2D-L2E'],
                                    model_save_dir=model_save_dir,
                                    logs_save_path=logs_save_path,
-                                   checkpoint=checkpoint)
+                                   checkpoint=checkpoint,
+                                   train_image_save=train_image_save)
 
 
 if __name__ == '__main__':
@@ -127,6 +129,7 @@ if __name__ == '__main__':
     parser.add_argument('--resume_from_epoch', '-R', type=int, default=None,
                         help='Epoch to resume experiment from. If resuming, experiment_dir must already exist, with saved model checkpoints and config yaml file.')
     parser.add_argument('--gpu', type=int, default=0)
+    parser.add_argument('--train_image_save','-IS',action='store_true',help='save train image if true')
     args = parser.parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
@@ -137,4 +140,5 @@ if __name__ == '__main__':
     run_train(device=device,
               experiment_dir=args.experiment_dir,
               pose_shape_cfg_opts=args.pose_shape_cfg_opts,
-              resume_from_epoch=args.resume_from_epoch)
+              resume_from_epoch=args.resume_from_epoch
+              train_image_save=args.train_image_save)
