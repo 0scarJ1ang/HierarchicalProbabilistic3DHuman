@@ -22,7 +22,7 @@ def run_train(device,
               experiment_dir,
               pose_shape_cfg_opts=None,
               resume_from_epoch=None,
-              train_image_save):
+              train_image_save=False):
 
     pose_shape_cfg = get_poseMF_shapeGaussian_cfg_defaults()
 
