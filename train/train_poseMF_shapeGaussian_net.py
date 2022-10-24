@@ -23,6 +23,9 @@ from utils.augmentation.proxy_rep_augmentation import augment_proxy_representati
 from utils.augmentation.rgb_augmentation import augment_rgb
 from utils.augmentation.lighting_augmentation import augment_light
 
+import matplotlib.pyplot as plt
+import cv2
+import os
 
 def train_poseMF_shapeGaussian_net(pose_shape_model,
                                    pose_shape_cfg,
@@ -38,7 +41,8 @@ def train_poseMF_shapeGaussian_net(pose_shape_model,
                                    model_save_dir,
                                    logs_save_path,
                                    save_val_metrics=['PVE-SC', 'MPJPE-PA'],
-                                   checkpoint=None):
+                                   checkpoint=None,
+                                   train_image_save=False):
     # Set up dataloaders
     train_dataloader = DataLoader(train_dataset,
                                   batch_size=pose_shape_cfg.TRAIN.BATCH_SIZE,
@@ -242,6 +246,17 @@ def train_poseMF_shapeGaussian_net(pose_shape_model,
                                                                                                  joints2D=target_joints2d_coco_input,
                                                                                                  joints2D_visib=target_joints2d_visib_coco,
                                                                                                  rgb_augment_config=pose_shape_cfg.TRAIN.SYNTH_DATA.AUGMENT.RGB)
+                    ###save image start
+                    if split =="train" and train_image_save==True:
+                        #print(rgb_in.shape)
+                        rgb_in_reshape=rgb_in.permute(0, 2, 3, 1)
+                        #print(rgb_in_reshape.shape)
+                        epoch_int = str(epoch)
+                        name_of_image = "image_" + epoch_int +".jpg"
+                        directory_to_save = model_save_dir+ "images/"
+                        cv2.imwrite(os.path.join(directory_to_save , name_of_image), rgb_in_reshape[0].cpu().numpy()*255)
+                    ###save image end
+                    
                     # Compute edge-images edges
                     edge_detector_output = edge_detect_model(rgb_in)
                     edge_in = edge_detector_output['thresholded_thin_edges'] if pose_shape_cfg.DATA.EDGE_NMS else edge_detector_output['thresholded_grad_magnitude']
