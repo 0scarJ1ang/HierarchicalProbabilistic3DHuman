@@ -140,5 +140,5 @@ if __name__ == '__main__':
     run_train(device=device,
               experiment_dir=args.experiment_dir,
               pose_shape_cfg_opts=args.pose_shape_cfg_opts,
-              resume_from_epoch=args.resume_from_epoch
+              resume_from_epoch=args.resume_from_epoch,
               train_image_save=args.train_image_save)
