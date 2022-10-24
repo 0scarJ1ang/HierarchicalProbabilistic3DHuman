@@ -167,14 +167,16 @@ class TexturedIUVRenderer(nn.Module):
                                               T=cam_t,
                                               focal_length=perspective_focal_length,
                                               principal_point=((img_wh/2., img_wh/2.),),
-                                              image_size=((img_wh, img_wh),))
+                                              image_size=((img_wh, img_wh),),
+                                              in_ndc=False)
         elif projection_type == 'orthographic':
             self.cameras = OrthographicCameras(device=device,
                                                R=cam_R,
                                                T=cam_t,
                                                focal_length=orthographic_scale*(img_wh/2.),
                                                principal_point=((img_wh / 2., img_wh / 2.),),
-                                               image_size=((img_wh, img_wh),))
+                                               image_size=((img_wh, img_wh),),
+                                               in_ndc=False)
 
         # Lights for textured RGB render - pre-defined here but can be specified in forward pass if lights will vary (e.g. random cameras)
         self.render_rgb = render_rgb
@@ -271,14 +273,9 @@ class TexturedIUVRenderer(nn.Module):
                 textures_rgb = TexturesUV(maps=textures, faces_uvs=self.faces_densepose, verts_uvs=self.verts_uv_offset)
             meshes_rgb = Meshes(verts=vertices, faces=self.faces_densepose, textures=textures_rgb)
 
-        local_cameras = OrthographicCameras(device=self.device,
-                                               R=self.cameras.R,
-                                               T=self.cameras.T,
-                                               focal_length=orthographic_scale,
-                                               principal_point=((0, 0),),
-                                               image_size=((self.img_wh, self.img_wh),))
+
         # Rasterize
-        fragments = self.rasterizer(meshes_iuv, cameras=local_cameras)
+        fragments = self.rasterizer(meshes_iuv, cameras=self.cameras)
         zbuffers = fragments.zbuf[:, :, :, 0]
 
         # Render RGB and IUV outputs
